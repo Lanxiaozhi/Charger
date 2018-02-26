@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+
+    <title>城市电动汽车充电桩分布</title>
+    <meta name="description" content="" />
+    <meta name="author" content="damien" />
+
+    <link rel="stylesheet" href="css/styles.css" type="text/css" />
+    <link href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.css" rel="stylesheet">
+
+    <script src="js/jquery-1.11.0.min.js"></script>
+    <script src="https://cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.js"></script>
+    <script src="js/e-smart-zoom-jquery.js"></script>
+
+    <script>
+        $(document).ready(function() {
+
+            $('#imageFullScreen').smartZoom();
+
+            $('#topPositionMap,#leftPositionMap,#rightPositionMap,#bottomPositionMap').bind("click", moveButtonClickHandler);
+            $('#zoomInButton,#zoomOutButton').bind("click", zoomButtonClickHandler);
+
+            function zoomButtonClickHandler(e){
+                var scaleToAdd = 0.8;
+                if(e.target.id == 'zoomOutButton')
+                    scaleToAdd = -scaleToAdd;
+                $('#imageFullScreen').smartZoom('zoom', scaleToAdd);
+            }
+
+            function moveButtonClickHandler(e){
+                var pixelsToMoveOnX = 0;
+                var pixelsToMoveOnY = 0;
+
+                switch(e.target.id){
+                    case "leftPositionMap":
+                        pixelsToMoveOnX = 50;
+                        break;
+                    case "rightPositionMap":
+                        pixelsToMoveOnX = -50;
+                        break;
+                    case "topPositionMap":
+                        pixelsToMoveOnY = 50;
+                        break;
+                    case "bottomPositionMap":
+                        pixelsToMoveOnY = -50;
+                        break;
+                }
+                $('#imageFullScreen').smartZoom('pan', pixelsToMoveOnX, pixelsToMoveOnY);
+            }
+
+        });
+    </script>
+</head>
+<body>
+<header id="header">
+    <div id="headerContainer">
+        <h1 style="color:white;">城市电动汽车充电桩分布</h1>
+    </div>
+</header>
+<div id="page">
+    <div style="padding: 50px 100px 10px;">
+        <form>
+            <div class="col-md-4 col-md-offset-2 col-sm-4 col-sm-offset-2 col-xs-4 col-xs-offset-2">
+            <div class="input-group input-group-lg">
+                <span class="input-group-addon">总数</span>
+                <input type="text" class="form-control" style="text-align:center;" id="total" placeholder="">
+            </div>
+            </div>
+            <div class="col-md-4 col-sm-4 col-xs-4">
+            <div class="input-group input-group-lg">
+                <span class="input-group-addon">比例</span>
+                <input type="text" class="form-control" style="text-align:center;" id="rate" placeholder="">
+            </div>
+            </div>
+        </form>
+    </div>
+    <div id="pageContent">
+        <div id="imgContainer">
+            <img id="imageFullScreen" src="src/map.jpg"/>
+        </div>
+        <div id="positionButtonDiv">
+            <p>缩放 :
+                <span>
+                    <img id="zoomInButton" class="zoomButton" src="src/zoomIn.png" title="zoom in" alt="zoom in" />
+                    <img id="zoomOutButton" class="zoomButton" src="src/zoomOut.png" title="zoom out" alt="zoom out" />
+                </span>
+            </p>
+            <p>
+                <span class="positionButtonSpan">
+                    <map name="positionMap" class="positionMapClass">
+                        <area id="topPositionMap" shape="rect" coords="20,0,40,20" title="move up" alt="move up"/>
+                        <area id="leftPositionMap" shape="rect" coords="0,20,20,40" title="move left" alt="move left"/>
+                        <area id="rightPositionMap" shape="rect" coords="40,20,60,40" title="move right" alt="move right"/>
+                        <area id="bottomPositionMap" shape="rect" coords="20,40,40,60" title="move bottom" alt="move bottom"/>
+                    </map>
+                    <img src="src/position.png" usemap="#positionMap" />
+                </span>
+            </p>
+        </div>
+    </div>
+    <div style="padding: 600px 100px 10px;">
+        <form>
+            <div class="col-md-5 col-md-offset-2 col-sm-5 col-sm-offset-2 col-xs-5 col-xs-offset-2">
+                <div class="input-group input-group-lg">
+                    <span class="input-group-addon">所选位置</span>
+                    <input type="text" class="form-control" style="text-align:center;" disabled="disabled" id="position" placeholder="">
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-3 col-xs-3">
+                <div class="input-group input-group-lg">
+                    <span class="input-group-addon">数量</span>
+                    <input type="text" class="form-control" style="text-align:center;" disabled="disabled" id="number" placeholder="">
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<footer>
+</footer>
+
+</body>
+</html>
