@@ -19,7 +19,7 @@
   <script>
     $(document).ready(function() {
 
-      $('#imageFullScreen').smartZoom();
+      $('#imageFullScreen').smartZoom({'maxScale' : 8, 'containerClass':'zoomableContainer'});
 
       $('#topPositionMap,#leftPositionMap,#rightPositionMap,#bottomPositionMap').bind("click", moveButtonClickHandler);
       $('#zoomInButton,#zoomOutButton').bind("click", zoomButtonClickHandler);
