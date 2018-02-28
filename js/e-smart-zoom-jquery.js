@@ -323,16 +323,45 @@
       zoomOnDblClick(e.pageX, e.pageY);
     }
 
+    var containerRect = document.getElementById("imageFullScreen").getBoundingClientRect();
+    var minHeight = containerRect.top;
+    var minWidth = containerRect.left;
+    var height = (containerRect.bottom - containerRect.top)/151;
+    var width =  (containerRect.right - containerRect.left)/48;
+    var heightNum = 151;
+    var widthNum = 48;
+
     function judgePosition(e){
+      console.log(minWidth);
       var result;
       var total = $("#total").val();
-      var containerRect = document.getElementById("imageFullScreen").getBoundingClientRect();
-      var minHeight = containerRect.top;
-      var minWidth = containerRect.left;
-      var height = containerRect.bottom - containerRect.top;
-      var width =  containerRect.right - containerRect.left;
-      result = 100 * parseInt((e.pageY - minHeight)/(height/60)) + parseInt((e.pageX - minWidth)/(width/100));
-      //result = total/6000;
+      for(var i=0;i<heightNum;i++){
+        if((e.pageY-minHeight)>=Math.round(height*i) && (e.pageY-minHeight) <Math.round(height*(i+1))) {
+          console.log(i);
+          for (var j = 0; j < widthNum; j++) {
+            if((e.pageX-minWidth)>=Math.round(width*j) && (e.pageX-minWidth)<Math.round(width*(j+1))){
+              console.log(j);
+
+              result = 48*i+j;
+            }
+          }
+        }
+      }
+      //result = 100 * parseInt((e.pageY - minHeight)/(height/60)) + parseInt((e.pageX - minWidth)/(width/100));
+      //console.log(parseInt((e.pageY - minHeight)/(height/60))+","+parseInt((e.pageX - minWidth)/(width/100)));
+      //result = total/7500;
+      var density;
+      Papa.parse('csv/density.csv', {
+        download: true,
+        complete: function(results) {
+          var data = results.data, html;
+          var item = data[result];
+          density = item[0];
+          $("#number").val(density);
+          //$("#number").val(parseInt(total*density));
+        }
+      });
+
       return result;
     }
 
@@ -341,10 +370,10 @@
      * @param {Object} e : mouse event
      */
     function mouseDownHandler(e){
-      $("#position").val("("+e.pageX+", "+e.pageY+")");
-      console.log("x:"+e.pageX+",y:"+e.pageY);
-      $("#number").val(judgePosition(e));
-      console.log(judgePosition(e));
+      $("#position").val("("+Math.round(e.pageX-minWidth)+", "+Math.round(e.pageY-minHeight)+")");
+      //console.log("x:"+e.pageX+",y:"+e.pageY);
+      $("#order").val(judgePosition(e));
+      //console.log(judgePosition(e));
       e.preventDefault(); // prevent default browser drag
       $(document).on('mousemove.smartZoom', mouseMoveHandler); // add mouse move and mouseup listeners to enable drag
       $(document).bind('mouseup.smartZoom', mouseUpHandler);
