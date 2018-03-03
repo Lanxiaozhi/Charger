@@ -51,22 +51,149 @@
         }
         $('#imageFullScreen').smartZoom('pan', pixelsToMoveOnX, pixelsToMoveOnY);
       }
-    });
 
-    var total,density;
-    $("#order").onchange = function(){
-      total = $("#total").val();
-      console.log(total);
-      Papa.parse('csv/probability.csv', {
+
+      var totalEvent = 0.1 * 24200000;
+      var totalPile = 20000;
+      var square = new Array();
+      var a = new Object();
+      for(var i=0;i<8000;i++){
+        square[i] = new Object();
+        square[i].prob = new Array();
+      }
+      var time = new Array();
+      for(var i=0;i<24;i++){
+        time[i] = new Array(4);
+      }
+      Papa.parse('csv/density.csv', {
         download: true,
         complete: function(results) {
           var data = results.data, html;
-          var item = data[i];
-          density = item[1];
-          $("#number").val(parseInt(total*density));
+          for(var i = 1, _l = data.length-1; i < _l; i++) {
+            var item = data[i];
+            square[i-1].longitude = item[1];
+            square[i-1].latitude = item[2];
+            square[i-1].kind = item[3];
+            square[i-1].density = item[4];
+          }
+          Papa.parse('csv/probability.csv', {
+            download: true,
+            complete: function(results) {
+              var data = results.data, html;
+              for(var i = 1, _l = data.length-1; i < _l; i++) {
+                time[i-1] = data[i];
+              }
+            }
+          });
         }
       });
-    }
+
+      var totalRate = new Array();
+      var pile = new Array();
+      for(var i=0;i<7295;i++){
+        var pile = Math.round(totalPile*square[i].density);
+      }
+
+      function calcRate(){
+        var result = 0;
+        for(var i=0;i<7925;i++){
+          result += totalRate[i];
+        }
+        return result;
+      }
+
+      var currentRate = 10000;
+      function calcPile() {
+        calcEvent();
+        while(1){
+          if(currentRate < calcRate())
+            break;
+          adjustEvent();
+          calcEvent();
+          currentRate = calcRate();
+        }
+      }
+      var order = new Array();
+      function adjustEvent(){
+        for(var i=0;i<7295;i++){
+          order[i] = i;
+        }
+        var count = 0;
+        for(var i=0;i<7295;i++){
+          if(totalRate[i] > 0)
+            count++;
+        }
+        for(var i=0;i<7295;i++){
+          for(var j=0;j<i;j++){
+            if(totalRate[i]>totalRate[j]){
+              var temp1 = totalRate[i];
+              var temp2 = order[i];
+              totalRate[i] = totalRate[j];
+              order[i] = order[j];
+              totalRate[j] = temp1;
+              order[j] = temp2;
+            }
+          }
+        }
+        for(var i=0;i<count/4;i++){
+          pile[i]--;
+          pile[count-i]++;
+        }
+      }
+
+      function calcEvent() {
+        for(var i=0;i<7295;i++){
+          pile[i]=100;
+          var event = new Array();
+          var totalChargingTime = 0;
+          var totalMiss = 0;
+          var totalChargingEvent = 0;
+          for(var j=0;j<24;j++){
+            event[j] = new Object();
+            event[j].toCharge = square[i].prob[j];
+            event[j].newCharge = 0;
+            event[j].charging = 0;
+          }
+          for(var j=0;j<24;j++){
+            totalChargingEvent += event[j].toCharge;
+            if(pile[i] - event[j].charging >= event[j].toCharge){
+              event[j].charging += event[j].toCharge;
+              event[j].newCharge = event[j].toCharge;
+              totalChargingTime+=event[j].charging;
+            }
+            else{
+              event[j].newCharge = pile[i] - event[j].charging;
+              event[j].charging = pile[i];
+              totalMiss += event[j].toCharge - event[j].newCharge;
+            }
+            for(var k=j+1;k<j+5;k++){
+              if(k<24){
+                event[k].charging += event[j].newCharge;
+              }
+            }
+          }
+          if(pile[i] > 0 && totalChargingEvent > 0) {
+            var missRate = totalMiss / totalChargingEvent;
+            var fillRate = totalChargingTime / pile[i] / 24;
+            totalRate[i] = 0.5*fillRate + 0.5*missRate;
+            console.log(totalRate[i]);
+          }
+        }
+      }
+
+      $("#page").hide();
+      $("#calculate").click(function () {
+        $("#input").hide();
+        //totalPile = $("#total").val();
+        for(var i=0;i<7295;i++){
+          for(var j=0;j<24;j++){
+            square[i].prob[j] = parseInt(square[i].density*totalEvent*time[j][square[i].kind]);
+          }
+        }
+        calcEvent();
+        $("#page").show();
+      });
+    });
   </script>
 </head>
 <body>
@@ -75,7 +202,7 @@
     <h1 style="color:white;">城市电动汽车充电桩分布</h1>
   </div>
 </header>
-<div id="page">
+<div id="input">
   <div style="padding: 50px 100px 10px;">
     <form>
       <div class="col-md-4 col-md-offset-1 col-sm-4 col-sm-offset-1 col-xs-4 col-xs-offset-1">
@@ -94,12 +221,15 @@
         </div>
       </div>
       <div class="col-md-1 col-sm-1 col-xs-1">
-        <button type="button" class="btn btn-primary btn-lg">
+        <button type="button" id="calculate" class="btn btn-primary btn-lg">
           <i class="fa fa-dashboard"></i> 计算
         </button>
       </div>
     </form>
   </div>
+</div>
+<div id="page">
+
   <div id="pageContent">
     <div id="imgContainer">
       <img id="imageFullScreen" src="src/map.jpg"/>
