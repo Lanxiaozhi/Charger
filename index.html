@@ -52,11 +52,9 @@
         $('#imageFullScreen').smartZoom('pan', pixelsToMoveOnX, pixelsToMoveOnY);
       }
 
-
       var totalEvent = 0.1 * 24200000;
-      var totalPile = 20000;
+      var totalPile = 72950;
       var square = new Array();
-      var a = new Object();
       for(var i=0;i<8000;i++){
         square[i] = new Object();
         square[i].prob = new Array();
@@ -65,39 +63,20 @@
       for(var i=0;i<24;i++){
         time[i] = new Array(4);
       }
-      Papa.parse('csv/density.csv', {
-        download: true,
-        complete: function(results) {
-          var data = results.data, html;
-          for(var i = 1, _l = data.length-1; i < _l; i++) {
-            var item = data[i];
-            square[i-1].longitude = item[1];
-            square[i-1].latitude = item[2];
-            square[i-1].kind = item[3];
-            square[i-1].density = item[4];
-          }
-          Papa.parse('csv/probability.csv', {
-            download: true,
-            complete: function(results) {
-              var data = results.data, html;
-              for(var i = 1, _l = data.length-1; i < _l; i++) {
-                time[i-1] = data[i];
-              }
-            }
-          });
-        }
-      });
-
       var totalRate = new Array();
+      for(var i=0;i<7295;i++){
+        totalRate[i]=0;
+      }
+
       var pile = new Array();
       for(var i=0;i<7295;i++){
-        var pile = Math.round(totalPile*square[i].density);
+        pile[i] = 0;
       }
 
       function calcRate(){
         var result = 0;
-        for(var i=0;i<7925;i++){
-          result += totalRate[i];
+        for(var i=0;i<totalRate.length;i++){
+          result += Number(totalRate[i]);
         }
         return result;
       }
@@ -105,27 +84,39 @@
       var currentRate = 10000;
       function calcPile() {
         calcEvent();
+
         while(1){
-          if(currentRate < calcRate())
-            break;
+
+          currentRate = calcRate();
           adjustEvent();
           calcEvent();
-          currentRate = calcRate();
+          if(currentRate >= calcRate())
+            break;
+
         }
+                          console.log(calcRate());
+console.log(totalRate);
+console.log(pile);
+      }
+
+      function swap(a,b){
+        var temp = a;
+        a = b;
+        b = temp;
       }
       var order = new Array();
       function adjustEvent(){
-        for(var i=0;i<7295;i++){
+        for(var i=0;i<totalRate.length;i++){
           order[i] = i;
         }
         var count = 0;
-        for(var i=0;i<7295;i++){
+        for(var i=0;i<totalRate.length;i++){
           if(totalRate[i] > 0)
             count++;
         }
-        for(var i=0;i<7295;i++){
-          for(var j=0;j<i;j++){
-            if(totalRate[i]>totalRate[j]){
+        for(var i=0;i<totalRate.length;i++){
+          for(var j=i+1;j<totalRate.length;j++){
+            if(totalRate[i]<totalRate[j]){
               var temp1 = totalRate[i];
               var temp2 = order[i];
               totalRate[i] = totalRate[j];
@@ -136,14 +127,13 @@
           }
         }
         for(var i=0;i<count/4;i++){
-          pile[i]--;
-          pile[count-i]++;
+          pile[order[i]]--;
+          pile[order[count-i]]++;
         }
       }
 
       function calcEvent() {
         for(var i=0;i<7295;i++){
-          pile[i]=100;
           var event = new Array();
           var totalChargingTime = 0;
           var totalMiss = 0;
@@ -175,22 +165,49 @@
           if(pile[i] > 0 && totalChargingEvent > 0) {
             var missRate = totalMiss / totalChargingEvent;
             var fillRate = totalChargingTime / pile[i] / 24;
-            totalRate[i] = 0.5*fillRate + 0.5*missRate;
-            console.log(totalRate[i]);
+            totalRate[i] = (0.5*fillRate + 0.5*missRate).toFixed(4);
+          }
+          else{
+            totalRate[i] = 0;
           }
         }
       }
+
+      Papa.parse('csv/density.csv', {
+        download: true,
+        complete: function(results) {
+          var data = results.data, html;
+          for(var i = 1, _l = data.length-1; i < _l; i++) {
+            var item = data[i];
+            square[i-1].longitude = item[1];
+            square[i-1].latitude = item[2];
+            square[i-1].kind = item[3];
+            square[i-1].density = item[4];
+            pile[i-1] = Math.round(totalPile*item[4]);
+          }
+          Papa.parse('csv/probability.csv', {
+            download: true,
+            complete: function(results) {
+              var data = results.data, html;
+              for(var i = 1, _l = data.length-1; i < _l; i++) {
+                time[i-1] = data[i];
+              }
+            }
+          });
+        }
+      });
 
       $("#page").hide();
       $("#calculate").click(function () {
         $("#input").hide();
         //totalPile = $("#total").val();
-        for(var i=0;i<7295;i++){
+        for(var i=0;i<square.length;i++){
           for(var j=0;j<24;j++){
             square[i].prob[j] = parseInt(square[i].density*totalEvent*time[j][square[i].kind]);
           }
         }
-        calcEvent();
+        calcPile();
+        console.log(calcRate());
         $("#page").show();
       });
     });
