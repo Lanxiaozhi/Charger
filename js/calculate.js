@@ -1,7 +1,4 @@
-var totalEvent = 0.05 * 24200000;
 var totalPile = 0;
-var totalQuick = 0;
-var totalSlow = 0;
 var square = new Array();
 var length = 8000;
 for(var i=0;i<length;i++){
@@ -45,7 +42,10 @@ var event_5 = new Array(403423);
 for(var i=0;i<event_5.length;i++){
   event_5[i] = new Object();
 }
-var event_10 = new Array();
+var event_10 = new Array(806551);
+for(var i=0;i<event_10.length;i++){
+  event_10[i] = new Object();
+}
 
 function calcQuickRate(){
   var result = 0;
@@ -90,9 +90,6 @@ function calcPile() {
   }
   console.log(totalQuickRate);
   console.log(totalSlowRate);
-  //console.log(calcRate());
-  //console.log(totalRate);
-  //console.log(pile);
 }
 
 function swap(a,b){
@@ -250,6 +247,16 @@ function calcEvent() {
       var id = event_5[i].gridID;
       var startTime = event_5[i].startTime;
       var eventDur = event_5[i].eventDur;
+      if (id >= 0 && id <= 7295 && startTime >= 0 && startTime <= 23) {
+        judgePile(id,startTime,eventDur);
+      }
+    }
+  }
+  else if($("#useRate").val() == "0.1") {
+    for (var i = 0; i < event_10.length; i++) {
+      var id = event_10[i].gridID;
+      var startTime = event_10[i].startTime;
+      var eventDur = event_10[i].eventDur;
       if (id >= 0 && id <= 7295 && startTime >= 0 && startTime <= 23) {
         judgePile(id,startTime,eventDur);
       }

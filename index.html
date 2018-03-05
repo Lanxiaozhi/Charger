@@ -55,7 +55,6 @@
 
       $("#page").hide();
 
-      console.log(square);
       Papa.parse('csv/density.csv', {
         download: true,
         complete: function(results) {
@@ -67,20 +66,10 @@
             square[i-1].kind = item[3];
             square[i-1].density = item[4];
           }
-          Papa.parse('csv/probability.csv', {
-            download: true,
-            complete: function(results) {
-              var data = results.data, html;
-              for(var i = 1, _l = data.length-1; i < _l; i++) {
-                time[i-1] = data[i];
-              }
-            }
-          });
           Papa.parse('csv/charevent-2.csv', {
             download: true,
             complete: function(results) {
               var data = results.data, html;
-              console.log(data.length);
               for(var i = 1, _l = data.length-1; i < _l; i++) {
                 var item = data[i];
                 event_2[i-1].gridID = item[1];
@@ -93,7 +82,6 @@
             download: true,
             complete: function(results) {
               var data = results.data, html;
-              console.log(data.length);
               for(var i = 1, _l = data.length-1; i < _l; i++) {
                 var item = data[i];
                 event_5[i-1].gridID = item[1];
@@ -102,7 +90,19 @@
               }
             }
           });
-
+          Papa.parse('csv/charevent-10.csv', {
+            download: true,
+            complete: function(results) {
+              var data = results.data, html;
+              console.log(data.length);
+              for(var i = 1, _l = data.length-1; i < _l; i++) {
+                var item = data[i];
+                event_10[i-1].gridID = item[1];
+                event_10[i-1].startTime = item[4];
+                event_10[i-1].eventDur = Math.ceil(item[5]/3600);
+              }
+            }
+          });
         }
       });
 
@@ -125,7 +125,6 @@
         console.log(calcSlowRate());
         $("#page").show();
       });
-
     });
   </script>
 </head>
@@ -226,7 +225,7 @@
         </div>
       </div>
     </form>
-    <div style="height:150px;"></div>
+    <div style="height:150px;" id="spin"></div>
     <div class="col-md-4 col-md-offset-4 col-sm-4 col-sm-offset-4 col-xs-4 col-xs-offset-4" style="text-align: center;">
       <p>后台计算耗时可能较多，请耐心等待</p>
     </div>
