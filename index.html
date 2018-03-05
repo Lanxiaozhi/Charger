@@ -14,6 +14,7 @@
   <script src="https://cdn.bootcss.com/jquery/1.11.0/jquery.min.js"></script>
   <script src="https://cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.js"></script>
   <script src="https://cdn.bootcss.com/PapaParse/4.3.7/papaparse.min.js"></script>
+  <script src="js/calculate.js"></script>
   <script src="js/e-smart-zoom-jquery.js"></script>
 
   <script>
@@ -52,127 +53,9 @@
         $('#imageFullScreen').smartZoom('pan', pixelsToMoveOnX, pixelsToMoveOnY);
       }
 
-      var totalEvent = 0.1 * 24200000;
-      var totalPile = 72950;
-      var square = new Array();
-      for(var i=0;i<8000;i++){
-        square[i] = new Object();
-        square[i].prob = new Array();
-      }
-      var time = new Array();
-      for(var i=0;i<24;i++){
-        time[i] = new Array(4);
-      }
-      var totalRate = new Array();
-      for(var i=0;i<7295;i++){
-        totalRate[i]=0;
-      }
+      $("#page").hide();
 
-      var pile = new Array();
-      for(var i=0;i<7295;i++){
-        pile[i] = 0;
-      }
-
-      function calcRate(){
-        var result = 0;
-        for(var i=0;i<totalRate.length;i++){
-          result += Number(totalRate[i]);
-        }
-        return result;
-      }
-
-      var currentRate = 10000;
-      function calcPile() {
-        calcEvent();
-
-        while(1){
-
-          currentRate = calcRate();
-          adjustEvent();
-          calcEvent();
-          if(currentRate >= calcRate())
-            break;
-
-        }
-                          console.log(calcRate());
-console.log(totalRate);
-console.log(pile);
-      }
-
-      function swap(a,b){
-        var temp = a;
-        a = b;
-        b = temp;
-      }
-      var order = new Array();
-      function adjustEvent(){
-        for(var i=0;i<totalRate.length;i++){
-          order[i] = i;
-        }
-        var count = 0;
-        for(var i=0;i<totalRate.length;i++){
-          if(totalRate[i] > 0)
-            count++;
-        }
-        for(var i=0;i<totalRate.length;i++){
-          for(var j=i+1;j<totalRate.length;j++){
-            if(totalRate[i]<totalRate[j]){
-              var temp1 = totalRate[i];
-              var temp2 = order[i];
-              totalRate[i] = totalRate[j];
-              order[i] = order[j];
-              totalRate[j] = temp1;
-              order[j] = temp2;
-            }
-          }
-        }
-        for(var i=0;i<count/4;i++){
-          pile[order[i]]--;
-          pile[order[count-i]]++;
-        }
-      }
-
-      function calcEvent() {
-        for(var i=0;i<7295;i++){
-          var event = new Array();
-          var totalChargingTime = 0;
-          var totalMiss = 0;
-          var totalChargingEvent = 0;
-          for(var j=0;j<24;j++){
-            event[j] = new Object();
-            event[j].toCharge = square[i].prob[j];
-            event[j].newCharge = 0;
-            event[j].charging = 0;
-          }
-          for(var j=0;j<24;j++){
-            totalChargingEvent += event[j].toCharge;
-            if(pile[i] - event[j].charging >= event[j].toCharge){
-              event[j].charging += event[j].toCharge;
-              event[j].newCharge = event[j].toCharge;
-              totalChargingTime+=event[j].charging;
-            }
-            else{
-              event[j].newCharge = pile[i] - event[j].charging;
-              event[j].charging = pile[i];
-              totalMiss += event[j].toCharge - event[j].newCharge;
-            }
-            for(var k=j+1;k<j+5;k++){
-              if(k<24){
-                event[k].charging += event[j].newCharge;
-              }
-            }
-          }
-          if(pile[i] > 0 && totalChargingEvent > 0) {
-            var missRate = totalMiss / totalChargingEvent;
-            var fillRate = totalChargingTime / pile[i] / 24;
-            totalRate[i] = (0.5*fillRate + 0.5*missRate).toFixed(4);
-          }
-          else{
-            totalRate[i] = 0;
-          }
-        }
-      }
-
+      console.log(square);
       Papa.parse('csv/density.csv', {
         download: true,
         complete: function(results) {
@@ -183,7 +66,6 @@ console.log(pile);
             square[i-1].latitude = item[2];
             square[i-1].kind = item[3];
             square[i-1].density = item[4];
-            pile[i-1] = Math.round(totalPile*item[4]);
           }
           Papa.parse('csv/probability.csv', {
             download: true,
@@ -194,59 +76,61 @@ console.log(pile);
               }
             }
           });
+          Papa.parse('csv/charevent-2.csv', {
+            download: true,
+            complete: function(results) {
+              var data = results.data, html;
+              console.log(data.length);
+              for(var i = 1, _l = data.length-1; i < _l; i++) {
+                var item = data[i];
+                event_2[i-1].gridID = item[1];
+                event_2[i-1].startTime = item[4];
+                event_2[i-1].eventDur = Math.ceil(item[5]/3600);
+              }
+            }
+          });
+          Papa.parse('csv/charevent-5.csv', {
+            download: true,
+            complete: function(results) {
+              var data = results.data, html;
+              console.log(data.length);
+              for(var i = 1, _l = data.length-1; i < _l; i++) {
+                var item = data[i];
+                event_5[i-1].gridID = item[1];
+                event_5[i-1].startTime = item[4];
+                event_5[i-1].eventDur = Math.ceil(item[5]/3600);
+              }
+            }
+          });
+
         }
       });
 
-      $("#page").hide();
       $("#calculate").click(function () {
         $("#input").hide();
-        //totalPile = $("#total").val();
+        $("#header").hide();
+        totalPile = $("#total").val();
+        var rate = $("#rate").val();
+        rate = Number(rate);
         for(var i=0;i<square.length;i++){
-          for(var j=0;j<24;j++){
-            square[i].prob[j] = parseInt(square[i].density*totalEvent*time[j][square[i].kind]);
-          }
+          pile[i] = Math.round(totalPile/square.length);
+          quickPile[i] = Math.round(pile[i]*rate/(1+rate));
+          slowPile[i] = pile[i] - quickPile[i];
+
         }
+        console.log(quickPile);
+        console.log(slowPile);
         calcPile();
-        console.log(calcRate());
+        console.log(calcQuickRate());
+        console.log(calcSlowRate());
         $("#page").show();
       });
+
     });
   </script>
 </head>
 <body>
-<header id="header">
-  <div id="headerContainer">
-    <h1 style="color:white;">城市电动汽车充电桩分布</h1>
-  </div>
-</header>
-<div id="input">
-  <div style="padding: 50px 100px 10px;">
-    <form>
-      <div class="col-md-4 col-md-offset-1 col-sm-4 col-sm-offset-1 col-xs-4 col-xs-offset-1">
-        <div class="input-group input-group-lg">
-          <span class="input-group-addon">总数</span>
-          <input type="text" class="form-control" style="text-align:center;"
-                 onkeyup="if(this.value.length==1){this.value=this.value.replace(/[^1-9]/g,'')}else{this.value=this.value.replace(/\D/g,'')}"
-                 onafterpaste="if(this.value.length==1){this.value=this.value.replace(/[^1-9]/g,'')}else{this.value=this.value.replace(/\D/g,'')}" id="total" placeholder="">
-        </div>
-      </div>
-      <div class="col-md-4 col-sm-4 col-xs-4">
-        <div class="input-group input-group-lg">
-          <span class="input-group-addon">比例</span>
-          <input type="text" class="form-control" style="text-align:center;" onkeyup="if(isNaN(value))execCommand('undo')"
-                 onafterpaste="if(isNaN(value))execCommand('undo')" id="rate" placeholder="">
-        </div>
-      </div>
-      <div class="col-md-1 col-sm-1 col-xs-1">
-        <button type="button" id="calculate" class="btn btn-primary btn-lg">
-          <i class="fa fa-dashboard"></i> 计算
-        </button>
-      </div>
-    </form>
-  </div>
-</div>
 <div id="page">
-
   <div id="pageContent">
     <div id="imgContainer">
       <img id="imageFullScreen" src="src/map.jpg"/>
@@ -271,7 +155,7 @@ console.log(pile);
       </p>
     </div>
   </div>
-  <div style="padding: 600px 100px 10px;">
+  <div style="padding: 570px 100px 10px;">
     <form>
       <div class="col-md-5 col-md-offset-2 col-sm-5 col-sm-offset-2 col-xs-5 col-xs-offset-2">
         <div class="input-group input-group-lg">
@@ -288,11 +172,69 @@ console.log(pile);
     </form>
     <div style="height:50px;"></div>
     <form>
-      <div class="col-md-6 col-md-offset-3 col-sm-6 col-sm-offset-3 col-xs-6 col-xs-offset-3">
+      <div class="col-md-5 col-md-offset-2 col-sm-5 col-sm-offset-2 col-xs-5 col-xs-offset-2">
         <div class="input-group input-group-lg">
-          <span class="input-group-addon">数量</span>
-          <input type="text" class="form-control" style="text-align:center;" disabled="disabled" id="number" placeholder="">
+          <span class="input-group-addon">功效函数<br/>(快充/慢充)</span>
+          <input type="text" class="form-control" style="text-align:center;" disabled="disabled" id="totalRate1" placeholder="">
+          <input type="text" class="form-control" style="text-align:center;" disabled="disabled" id="totalRate2" placeholder="">
         </div>
+      </div>
+      <div class="col-md-3 col-sm-3 col-xs-3">
+        <div class="input-group input-group-lg">
+          <span class="input-group-addon">数量<br/>(快充/慢充)</span>
+          <input type="text" class="form-control" style="text-align:center;" disabled="disabled" id="number1" placeholder="">
+          <input type="text" class="form-control" style="text-align:center;" disabled="disabled" id="number2" placeholder="">
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+<header id="header">
+  <div id="headerContainer">
+    <h1 style="color:white;">城市电动汽车充电桩分布</h1>
+    <p class="pull-right" style="color:white;">V1.0 By Lanxiaozhi</p>
+  </div>
+</header>
+<div id="input">
+  <div style="padding: 150px 100px 10px;">
+    <form>
+      <div class="col-md-4 col-md-offset-4 col-sm-4 col-sm-offset-4 col-xs-4 col-xs-offset-4">
+        <div class="input-group input-group-lg">
+          <span class="input-group-addon">总数</span>
+          <input type="text" class="form-control" style="text-align:center;"
+                 onkeyup="if(this.value.length==1){this.value=this.value.replace(/[^1-9]/g,'')}else{this.value=this.value.replace(/\D/g,'')}"
+                 onafterpaste="if(this.value.length==1){this.value=this.value.replace(/[^1-9]/g,'')}else{this.value=this.value.replace(/\D/g,'')}" id="total" value="50000" placeholder="50000">
+        </div>
+      </div>
+      <div style="height:50px;"></div>
+      <div class="col-md-4 col-md-offset-4 col-sm-4 col-sm-offset-4 col-xs-4 col-xs-offset-4">
+        <div class="input-group input-group-lg">
+          <span class="input-group-addon">比例(快充:慢充)</span>
+          <input type="text" class="form-control" style="text-align:center;" onkeyup="if(isNaN(value))execCommand('undo')"
+                 onafterpaste="if(isNaN(value))execCommand('undo')" id="rate" placeholder="1" value="1">
+        </div>
+      </div>
+      <div style="height:50px;"></div>
+      <div class="col-md-4 col-md-offset-4 col-sm-4 col-sm-offset-4 col-xs-4 col-xs-offset-4">
+        <div class="input-group input-group-lg">
+          <span class="input-group-addon">电动汽车使用率</span>
+          <select name="useRate" id="useRate" class="selectpicker show-tick form-control" style="text-align: center;" multiple data-live-search="false">
+            <option value="0.02" selected>2%</option>
+            <option value="0.05">5%</option>
+            <option value="0.1">10%</option>
+          </select>
+        </div>
+      </div>
+    </form>
+    <div style="height:150px;"></div>
+    <div class="col-md-4 col-md-offset-4 col-sm-4 col-sm-offset-4 col-xs-4 col-xs-offset-4" style="text-align: center;">
+      <p>后台计算耗时可能较多，请耐心等待</p>
+    </div>
+    <form>
+      <div class="col-md-4 col-md-offset-4 col-sm-4 col-sm-offset-4 col-xs-4 col-xs-offset-4">
+        <button type="button" id="calculate" class="btn btn-primary btn-lg btn-block">
+          <i class="fa fa-dashboard"></i> 计算
+        </button>
       </div>
     </form>
   </div>

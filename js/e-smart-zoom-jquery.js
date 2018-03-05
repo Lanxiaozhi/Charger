@@ -323,7 +323,7 @@
       zoomOnDblClick(e.pageX, e.pageY);
     }
 
-    var total = $("#total").val();
+    /*var total = $("#total").val();
     total = 6000 * 9070000;
     var square = new Array(8000);
     var a = new Object();
@@ -361,7 +361,7 @@
           }
         });
       }
-    });
+    });*/
 
 
 
@@ -379,8 +379,8 @@
       console.log(parseInt((e.pageY - minHeight)/height));
       result = 60 * parseInt(100*(e.pageY - minHeight)/height) + parseInt(60*(e.pageX - minWidth)/width);
       console.log(result);
-      console.log(square[result].prob[3]);
-      result = square[result].density;
+      //console.log(square[result].prob[3]);
+      //result = square[result].density;
       //result = total/7500;
 
 
@@ -394,7 +394,12 @@
     function mouseDownHandler(e){
       $("#position").val("("+Math.round(e.pageX-minWidth)+", "+Math.round(e.pageY-minHeight)+")");
       //console.log("x:"+e.pageX+",y:"+e.pageY);
-      $("#order").val(judgePosition(e));
+      var order = judgePosition(e);
+      $("#order").val(order);
+      $("#number1").val(quickPile[order]);
+      $("#number2").val(slowPile[order]);
+      $("#totalRate1").val(totalQuickRate[order]);
+      $("#totalRate2").val(totalSlowRate[order]);
       //console.log(judgePosition(e));
       e.preventDefault(); // prevent default browser drag
       $(document).on('mousemove.smartZoom', mouseMoveHandler); // add mouse move and mouseup listeners to enable drag
