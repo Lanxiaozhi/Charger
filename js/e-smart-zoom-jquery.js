@@ -371,19 +371,27 @@
     var minWidth = containerRect.left;
     var height = containerRect.bottom - containerRect.top;
     var width =  containerRect.right - containerRect.left;
-    var heightNum = 100;
-    var widthNum = 60;
+    var heightNum = 146;
+    var widthNum = 132;
 
     function judgePosition(e){
-      var result;
+      var result,longitude,latitude;
       console.log(parseInt((e.pageY - minHeight)/height));
-      result = 60 * parseInt(100*(e.pageY - minHeight)/height) + parseInt(60*(e.pageX - minWidth)/width);
+      longitude = 121.30 + 0.0078 * (e.pageY - minHeight)/height;
+      latitude = 31.83 + 0.0090 * (e.pageX - minWidth)/width;
+      $("#position").val("("+longitude.toFixed(4)+", "+latitude.toFixed(4)+")");
+      console.log(longitude + "," +latitude);
+      for(var i=0;i<square.length;i++){
+        if(longitude >= square[i].longitude && longitude < square[i].longitude + 0.0078
+        && latitude >= square[i].latitude && latitude < square[i].latitude + 0.0090){
+          result = i;
+        }
+        else{
+          result = -1;
+        }
+      }
+      result = Math.round(Math.random()*7925);
       console.log(result);
-      //console.log(square[result].prob[3]);
-      //result = square[result].density;
-      //result = total/7500;
-
-
       return result;
     }
 
@@ -392,14 +400,16 @@
      * @param {Object} e : mouse event
      */
     function mouseDownHandler(e){
-      $("#position").val("("+Math.round(e.pageX-minWidth)+", "+Math.round(e.pageY-minHeight)+")");
+      //$("#position").val("("+Math.round(e.pageX-minWidth)+", "+Math.round(e.pageY-minHeight)+")");
       //console.log("x:"+e.pageX+",y:"+e.pageY);
       var order = judgePosition(e);
-      $("#order").val(order);
-      $("#number1").val(quickPile[order]);
-      $("#number2").val(slowPile[order]);
-      $("#totalRate1").val(totalQuickRate[order]);
-      $("#totalRate2").val(totalSlowRate[order]);
+      if(order >= 0 ) {
+        $("#order").val(order);
+        $("#number1").val(quickPile[order]);
+        $("#number2").val(slowPile[order]);
+        $("#totalRate1").val(totalQuickRate[order]);
+        $("#totalRate2").val(totalSlowRate[order]);
+      }
       //console.log(judgePosition(e));
       e.preventDefault(); // prevent default browser drag
       $(document).on('mousemove.smartZoom', mouseMoveHandler); // add mouse move and mouseup listeners to enable drag

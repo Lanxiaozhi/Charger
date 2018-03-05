@@ -96,7 +96,6 @@
             download: true,
             complete: function(results) {
               var data = results.data, html;
-              console.log(data.length);
               for(var i = 1, _l = data.length-1; i < _l; i++) {
                 var item = data[i];
                 event_10[i-1].gridID = item[1];
@@ -122,8 +121,8 @@
           slowPile[i] = pile[i] - quickPile[i];
 
         }
-        console.log(quickPile);
-        console.log(slowPile);
+        //console.log(quickPile);
+        //console.log(slowPile);
         calcPile();
         console.log(calcQuickRate());
         console.log(calcSlowRate());
