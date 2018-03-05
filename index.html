@@ -8,6 +8,8 @@
   <meta name="author" content="damien" />
 
   <link rel="stylesheet" href="css/styles.css" type="text/css" />
+  <link rel="stylesheet" type="text/css" href="css/loading_style.css">
+
   <link href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.css" rel="stylesheet">
   <link href="https://cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
 
@@ -101,6 +103,8 @@
                 event_10[i-1].startTime = item[4];
                 event_10[i-1].eventDur = Math.ceil(item[5]/3600);
               }
+              $('body').addClass('loaded');
+              $('#loader-wrapper .load_title').remove();
             }
           });
         }
@@ -188,10 +192,16 @@
     </form>
   </div>
 </div>
+<div id="loader-wrapper">
+  <div id="loader"></div>
+  <div class="loader-section section-left"></div>
+  <div class="loader-section section-right"></div>
+  <div class="load_title">Loading...<br><span>V1.0.2</span></div>
+</div>
 <header id="header">
   <div id="headerContainer">
     <h1 style="color:white;">城市电动汽车充电桩分布</h1>
-    <p class="pull-right" style="color:white;">V1.0 By Lanxiaozhi</p>
+    <p class="pull-right" style="color:white;">V1.0.2 By Lanxiaozhi</p>
   </div>
 </header>
 <div id="input">
