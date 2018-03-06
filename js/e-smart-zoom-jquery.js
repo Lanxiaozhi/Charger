@@ -323,75 +323,35 @@
       zoomOnDblClick(e.pageX, e.pageY);
     }
 
-    /*var total = $("#total").val();
-    total = 6000 * 9070000;
-    var square = new Array(8000);
-    var a = new Object();
-    for(var i=0;i<8000;i++){
-      square[i] = new Object();
-      square[i].prob = new Array(24);
-    }
-    var time = new Array(24);
-    for(var i=0;i<24;i++){
-      time[i] = new Array(4);
-    }
-    Papa.parse('csv/density.csv', {
-      download: true,
-      complete: function(results) {
-        var data = results.data, html;
-        for(var i = 1, _l = data.length-1; i < _l; i++) {
-          var item = data[i];
-          square[i].longitude = item[1];
-          square[i].latitude = item[2];
-          square[i].kind = item[3];
-          square[i].density = item[4];
-        }
-        Papa.parse('csv/probability.csv', {
-          download: true,
-          complete: function(results) {
-            var data = results.data, html;
-            for(var i = 1, _l = data.length-1; i < _l; i++) {
-              time[i] = data[i];
-            }
-            for(var i=0;i<7295;i++){
-              for(var j=0;j<24;j++){
-                square[i].prob[j] = square[i].density*total*time[j][square[i].kind];
-              }
-            }
-          }
-        });
-      }
-    });*/
-
-
-
-
-    var containerRect = document.getElementById("imageFullScreen").getBoundingClientRect();
-    var minHeight = containerRect.top;
-    var minWidth = containerRect.left;
-    var height = containerRect.bottom - containerRect.top;
-    var width =  containerRect.right - containerRect.left;
     var heightNum = 146;
     var widthNum = 132;
-
     function judgePosition(e){
-      var result,longitude,latitude;
-      console.log(parseInt((e.pageY - minHeight)/height));
-      longitude = 121.30 + 0.0078 * (e.pageY - minHeight)/height;
-      latitude = 31.83 + 0.0090 * (e.pageX - minWidth)/width;
-      $("#position").val("("+longitude.toFixed(4)+", "+latitude.toFixed(4)+")");
-      console.log(longitude + "," +latitude);
-      for(var i=0;i<square.length;i++){
-        if(longitude >= square[i].longitude && longitude < square[i].longitude + 0.0078
-        && latitude >= square[i].latitude && latitude < square[i].latitude + 0.0090){
+      var rateHeight,rateWidth,result,x,y;
+      var smartData = targetElement.data('smartZoomData');
+      var globaRequestedX;
+      var globaRequestedY;
+
+      globaRequestedX = e.pageX;
+      globaRequestedY = e.pageY;
+
+      stopAnim(ESmartZoomEvent.ZOOM);
+
+      var targetRect = getTargetRect(true); // the target rectangle in global position
+      var positionGlobalXDiff = globaRequestedX - targetRect.x; // the position difference between with the target position
+      var positionGlobalYDiff = globaRequestedY - targetRect.y;
+      rateWidth = positionGlobalXDiff/targetRect.width;
+      rateHeight = positionGlobalYDiff/targetRect.height;
+
+      y = heightNum - Math.ceil(heightNum * rateHeight);
+      x = Math.floor(widthNum * rateWidth);
+      $("#position").val("("+x+", "+y+")");
+      result = -1;
+      for(var i=0;i<7296;i++){
+        if(gridClip[i].x == x && gridClip[i].y == y){
           result = i;
-        }
-        else{
-          result = -1;
+          break;
         }
       }
-      result = Math.round(Math.random()*7925);
-      console.log(result);
       return result;
     }
 
@@ -400,8 +360,6 @@
      * @param {Object} e : mouse event
      */
     function mouseDownHandler(e){
-      //$("#position").val("("+Math.round(e.pageX-minWidth)+", "+Math.round(e.pageY-minHeight)+")");
-      //console.log("x:"+e.pageX+",y:"+e.pageY);
       var order = judgePosition(e);
       if(order >= 0 ) {
         $("#order").val(order);
@@ -410,7 +368,13 @@
         $("#totalRate1").val(totalQuickRate[order]);
         $("#totalRate2").val(totalSlowRate[order]);
       }
-      //console.log(judgePosition(e));
+      else{
+        $("#order").val("未划分的区域");
+        $("#number1").val("");
+        $("#number2").val("");
+        $("#totalRate1").val("");
+        $("#totalRate2").val("");
+      }
       e.preventDefault(); // prevent default browser drag
       $(document).on('mousemove.smartZoom', mouseMoveHandler); // add mouse move and mouseup listeners to enable drag
       $(document).bind('mouseup.smartZoom', mouseUpHandler);
@@ -460,6 +424,7 @@
      * @param {Object} e : touch event
      */
     function touchStartHandler(e){
+
       e.preventDefault(); // prevent default browser drag
 
       $(document).unbind('touchmove.smartZoom'); // unbind if we already listen touch events
@@ -544,6 +509,7 @@
      * @param {Object} e : touch event
      */
     function touchEndHandler(e){
+
       e.preventDefault(); // prevent default browser behaviour
 
       var nbTouchAtEnd = e.originalEvent.touches.length;

@@ -1,9 +1,17 @@
 var totalPile = 0;
 var square = new Array();
-var length = 8000;
+var length = 7296;
 for(var i=0;i<length;i++){
   square[i] = new Object();
   square[i].prob = new Array();
+}
+var grid = new Array();
+for(var i=0;i<19272;i++){
+  grid[i] = new Object();
+}
+var gridClip = new Array();
+for(var i=0;i<7296;i++){
+  gridClip[i] = new Object();
 }
 var time = new Array();
 for(var i=0;i<24;i++){
@@ -88,8 +96,8 @@ function calcPile() {
       break;
     }
   }
-  console.log(totalQuickRate);
-  console.log(totalSlowRate);
+  //console.log(totalQuickRate);
+  //console.log(totalSlowRate);
 }
 
 function swap(a,b){

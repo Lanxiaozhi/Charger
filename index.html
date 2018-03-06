@@ -57,6 +57,28 @@
 
       $("#page").hide();
 
+      Papa.parse('csv/gridall.csv', {
+        download: true,
+        complete: function(results) {
+          var data = results.data, html;
+          for(var i = 1, _l = data.length-1; i < _l; i++) {
+            var item = data[i];
+            grid[i-1].x = item[3];
+            grid[i-1].y = item[4];
+          }
+        }
+      });
+      Papa.parse('csv/gridclip.csv', {
+        download: true,
+        complete: function(results) {
+          var data = results.data, html;
+          for(var i = 1, _l = data.length-1; i < _l; i++) {
+            var item = data[i];
+            gridClip[i-1].x = item[4];
+            gridClip[i-1].y = item[5];
+          }
+        }
+      });
       Papa.parse('csv/density.csv', {
         download: true,
         complete: function(results) {
@@ -112,20 +134,31 @@
       $("#calculate").click(function () {
         $("#input").hide();
         $("#header").hide();
-        totalPile = $("#total").val();
-        var rate = $("#rate").val();
-        rate = Number(rate);
+        totalPile = Number($("#total").val());
+        var rate = Number($("#rate").val());
         for(var i=0;i<square.length;i++){
-          pile[i] = Math.round(totalPile/square.length);
+          pile[i] = Math.round(totalPile*square[i].density);
+          totalPile -= pile[i];
           quickPile[i] = Math.round(pile[i]*rate/(1+rate));
           slowPile[i] = pile[i] - quickPile[i];
-
         }
-        //console.log(quickPile);
-        //console.log(slowPile);
+        while(totalPile > 0){
+          var randomId = Math.round(Math.random()*square.length);
+          if(totalPile > 1) {
+            pile[randomId] += 2;
+            quickPile[randomId] += 1;
+            slowPile[randomId] += 1;
+            totalPile -= 2;
+          }
+          else{
+            pile[randomId] += 1;
+            quickPile[randomId] += 1;
+            totalPile -= 1;
+          }
+        }
         calcPile();
-        console.log(calcQuickRate());
-        console.log(calcSlowRate());
+        //console.log(calcQuickRate());
+        //console.log(calcSlowRate());
         $("#page").show();
       });
     });
@@ -159,13 +192,13 @@
   </div>
   <div style="padding: 570px 100px 10px;">
     <form>
-      <div class="col-md-5 col-md-offset-2 col-sm-5 col-sm-offset-2 col-xs-5 col-xs-offset-2">
+      <div class="col-md-6 col-md-offset-1 col-sm-6 col-sm-offset-1 col-xs-6 col-xs-offset-1">
         <div class="input-group input-group-lg">
           <span class="input-group-addon">所选位置</span>
           <input type="text" class="form-control" style="text-align:center;" disabled="disabled" id="position" placeholder="">
         </div>
       </div>
-      <div class="col-md-3 col-sm-3 col-xs-3">
+      <div class="col-md-4 col-sm-4 col-xs-4">
         <div class="input-group input-group-lg">
           <span class="input-group-addon">序号</span>
           <input type="text" class="form-control" style="text-align:center;" disabled="disabled" id="order" placeholder="">
@@ -174,14 +207,14 @@
     </form>
     <div style="height:50px;"></div>
     <form>
-      <div class="col-md-5 col-md-offset-2 col-sm-5 col-sm-offset-2 col-xs-5 col-xs-offset-2">
+      <div class="col-md-6 col-md-offset-1 col-sm-6 col-sm-offset-1 col-xs-6 col-xs-offset-1">
         <div class="input-group input-group-lg">
           <span class="input-group-addon">功效函数<br/>(快充/慢充)</span>
           <input type="text" class="form-control" style="text-align:center;" disabled="disabled" id="totalRate1" placeholder="">
           <input type="text" class="form-control" style="text-align:center;" disabled="disabled" id="totalRate2" placeholder="">
         </div>
       </div>
-      <div class="col-md-3 col-sm-3 col-xs-3">
+      <div class="col-md-4 col-sm-4 col-xs-4">
         <div class="input-group input-group-lg">
           <span class="input-group-addon">数量<br/>(快充/慢充)</span>
           <input type="text" class="form-control" style="text-align:center;" disabled="disabled" id="number1" placeholder="">
@@ -195,12 +228,12 @@
   <div id="loader"></div>
   <div class="loader-section section-left"></div>
   <div class="loader-section section-right"></div>
-  <div class="load_title">Loading...<br><span>V1.0.2</span></div>
+  <div class="load_title">Loading...<br><span>V1.0.3</span></div>
 </div>
 <header id="header">
   <div id="headerContainer">
     <h1 style="color:white;">城市电动汽车充电桩分布</h1>
-    <p class="pull-right" style="color:white;">V1.0.2 By Lanxiaozhi</p>
+    <p class="pull-right" style="color:white;">V1.0.3By Lanxiaozhi</p>
   </div>
 </header>
 <div id="input">
@@ -241,7 +274,7 @@
     <form>
       <div class="col-md-4 col-md-offset-4 col-sm-4 col-sm-offset-4 col-xs-4 col-xs-offset-4">
         <button type="button" id="calculate" class="btn btn-primary btn-lg btn-block">
-          <i class="fa fa-dashboard"></i> 计算
+          <i class="fa fa-car"></i> 计算
         </button>
       </div>
     </form>
