@@ -82,15 +82,25 @@ function calcSlowRate(){
 
 var disQuickPile = new Array();
 var disSlowPile = new Array();
+var disQuickRate = new Array();
+var disSlowRate = new Array();
 for(var i=0;i<10;i++){
   disQuickPile[i] = 0;
   disSlowPile[i] = 0;
+  disQuickRate[i] = 0;
+  disSlowRate[i] = 0;
 }
 
 var currentQuickRate = 1000000;
 var currentSlowRate = 1000000;
 var totalQuickMissRate = 0,totalQuickFillRate = 0,totalSlowMissRate = 0, totalSlowFillRate = 0;
 var quickCount = 0, slowCount = 0;
+var count1 = new Array();
+var count2 = new Array();
+for(var i=0;i<10;i++){
+  count1[i] = 0;
+  count2[i] = 0;
+}
 function calcPile() {
   calcEvent();
   while(1){
@@ -114,12 +124,25 @@ function calcPile() {
       break;
     }
   }
+  var rate1,rate2;
+  rate1 = ((totalQuickFillRate/quickCount)*0.5+(1-(totalQuickMissRate/quickCount))*0.5).toFixed(4);
+  rate2 = ((totalSlowFillRate/slowCount)*0.5+(1-(totalSlowMissRate/slowCount))*0.5).toFixed(4);
   console.log("Quick--MissRate:"+(totalQuickMissRate/quickCount).toFixed(4)+",FillRate:"+(totalQuickFillRate/quickCount).toFixed(4));
   console.log("Slow--MissRate:"+(totalSlowMissRate/slowCount).toFixed(4)+",FillRate:"+(totalSlowFillRate/slowCount).toFixed(4));
+  $("#func1a").val(rate1);
+  $("#func1b").val(rate2);
   for(var i=0;i<square.length;i++){
     var kind = district[i].kind;
+    if(quickPile[i] > 0){
+      count1[kind]++;
+    }
+    if(slowPile[i] > 0){
+      count2[kind]++;
+    }
     disQuickPile[kind] += quickPile[i];
+    disQuickRate[kind] += Number(totalQuickRate[i]);
     disSlowPile[kind] += slowPile[i];
+    disSlowRate[kind] += Number(totalSlowRate[i]);
   }
 }
 

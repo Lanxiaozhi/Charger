@@ -174,18 +174,26 @@
         //console.log(calcQuickRate());
         //console.log(calcSlowRate());
         $("#page").show();
-         var end = new Date().getTime();
-         console.log((end - start)+"ms");
+        var end = new Date().getTime();
+        console.log((end - start)+"ms");
       });
 
       $("#district").change(function () {
         var kind = Number($("#district").val());
+        var rate1,rate2;
+
         if(kind == 6 || kind == 7 ){
           $("#disTotal").val((disQuickPile[5]+disQuickPile[6])+" | "+(disSlowPile[5]+disSlowPile[6]));
+          rate1 = ((disQuickRate[5]+disQuickRate[6])/(count1[5]+count1[6])).toFixed(4);
+          rate2 = ((disSlowRate[5]+disSlowRate[6])/(count2[5]+count2[6])).toFixed(4);
         }
         else{
           $("#disTotal").val(disQuickPile[kind - 1]+" | "+disSlowPile[kind - 1]);
+          rate1 = (disQuickRate[kind - 1]/count1[kind - 1]).toFixed(4);
+          rate2 = (disSlowRate[kind - 1]/count2[kind - 1]).toFixed(4);
         }
+        $("#func2a").val(rate1);
+        $("#func2b").val(rate2);
       })
     });
   </script>
@@ -235,7 +243,24 @@
       </div>
     </form>
     <form>
-      <div class="col-md-4 col-md-offset-1 col-sm-4 col-sm-offset-1 col-xs-4 col-xs-offset-1">
+      <div class="col-md-5 col-md-offset-1 col-sm-5 col-sm-offset-1 col-xs-5 col-xs-offset-1">
+        <div class="input-group input-group-lg">
+          <span class="input-group-addon">数量<br/>(快充/慢充)</span>
+          <input type="text" class="form-control" style="text-align:center;border-radius:1px;" disabled="disabled" id="number1" placeholder="">
+          <input type="text" class="form-control" style="text-align:center;border-radius:1px;" disabled="disabled" id="number2" placeholder="">
+        </div>
+      </div>
+      <div class="col-md-5 col-sm-5 col-xs-5">
+        <div class="input-group input-group-lg">
+          <span class="input-group-addon">区域功效函数<br/>(快充/慢充)</span>
+          <input type="text" class="form-control" style="text-align:center;border-radius:1px;" disabled="disabled" id="totalRate1" placeholder="">
+          <input type="text" class="form-control" style="text-align:center;border-radius:1px;" disabled="disabled" id="totalRate2" placeholder="">
+        </div>
+      </div>
+    </form>
+    <div style="height:90px;"></div>
+    <form>
+      <div class="col-md-5 col-md-offset-1 col-sm-5 col-sm-offset-1 col-xs-5 col-xs-offset-1">
         <div class="input-group input-group-lg">
           <span class="input-group-addon">行政区划</span>
           <select name="useRate" id="district" class="selectpicker show-tick form-control" style="text-align: center;" multiple data-live-search="false">
@@ -251,27 +276,27 @@
           </select>
         </div>
       </div>
-      <div class="col-md-6 col-sm-6 col-xs-6">
+      <div class="col-md-5 col-sm-5 col-xs-5">
         <div class="input-group input-group-lg">
           <span class="input-group-addon">总数(快充/慢充)</span>
           <input type="text" class="form-control" style="text-align:center;" disabled="disabled" id="disTotal" placeholder="|">
         </div>
       </div>
     </form>
-    <div style="height:50px;"></div>
+    <div style="height:60px;"></div>
     <form>
-      <div class="col-md-4 col-md-offset-1 col-sm-4 col-sm-offset-1 col-xs-4 col-xs-offset-1">
+      <div class="col-md-5 col-md-offset-1 col-sm-5 col-sm-offset-1 col-xs-5 col-xs-offset-1">
         <div class="input-group input-group-lg">
-          <span class="input-group-addon">数量<br/>(快充/慢充)</span>
-          <input type="text" class="form-control" style="text-align:center;" disabled="disabled" id="number1" placeholder="">
-          <input type="text" class="form-control" style="text-align:center;" disabled="disabled" id="number2" placeholder="">
+          <span class="input-group-addon">平均功效函数<br/>(快充/慢充)</span>
+          <input type="text" class="form-control" style="text-align:center;border-radius:1px;" disabled="disabled" id="func1a" placeholder="">
+          <input type="text" class="form-control" style="text-align:center;border-radius:1px;" disabled="disabled" id="func1b" placeholder="">
         </div>
       </div>
-      <div class="col-md-6 col-sm-6 col-xs-6">
+      <div class="col-md-5 col-sm-5 col-xs-5">
         <div class="input-group input-group-lg">
-          <span class="input-group-addon">功效函数<br/>(快充/慢充)</span>
-          <input type="text" class="form-control" style="text-align:center;" disabled="disabled" id="totalRate1" placeholder="">
-          <input type="text" class="form-control" style="text-align:center;" disabled="disabled" id="totalRate2" placeholder="">
+          <span class="input-group-addon">区划功效函数<br/>(快充/慢充)</span>
+          <input type="text" class="form-control" style="text-align:center;border-radius:1px;" disabled="disabled" id="func2a" placeholder="">
+          <input type="text" class="form-control" style="text-align:center;border-radius:1px;" disabled="disabled" id="func2b" placeholder="">
         </div>
       </div>
     </form>
@@ -281,12 +306,12 @@
   <div id="loader"></div>
   <div class="loader-section section-left"></div>
   <div class="loader-section section-right"></div>
-  <div class="load_title">Loading...<br><span>V1.0.5</span></div>
+  <div class="load_title">Loading...<br><span>V1.0.6</span></div>
 </div>
 <header id="header">
   <div id="headerContainer">
     <h1 style="color:white;">城市电动汽车充电桩分布</h1>
-    <p class="pull-right" style="color:white;">V1.0.5 By Lanxiaozhi</p>
+    <p class="pull-right" style="color:white;">V1.0.6 By Lanxiaozhi</p>
   </div>
 </header>
 <div id="input">
@@ -333,9 +358,5 @@
     </form>
   </div>
 </div>
-
-<footer>
-</footer>
-
 </body>
 </html>
