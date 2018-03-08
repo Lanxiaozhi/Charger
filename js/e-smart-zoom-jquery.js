@@ -157,6 +157,7 @@
        */
       zoom : function(scaleToAdd, globalRequestedPosition, duration){
 
+        $("#flag").hide();
         var smartData = targetElement.data('smartZoomData');
         var globaRequestedX;
         var globaRequestedY;
@@ -360,6 +361,14 @@
      * @param {Object} e : mouse event
      */
     function mouseDownHandler(e){
+      console.log($("#page").offset().left+","+(e.pageY-$("#page").offset().top));
+      $("#flag").css(
+          {"position":"absolute",
+            "margin-left":(e.pageX-$("#page").offset().left-15),
+            "margin-top":(e.pageY-$("#page").offset().top-30),
+            "z-index":5});
+      $("#flag").show();
+
       var order = judgePosition(e);
       if(order >= 0 ) {
         $("#order").val(order);

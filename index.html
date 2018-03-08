@@ -80,6 +80,18 @@
           }
         }
       });
+      Papa.parse('csv/district.csv', {
+        download: true,
+        complete: function(results) {
+          var data = results.data, html;
+          for(var i = 1, _l = data.length-1; i < _l; i++) {
+            var item = data[i];
+            district[i-1].id = item[0];
+            district[i-1].name = item[1];
+            district[i-1].kind = item[2];
+          }
+        }
+      });
       Papa.parse('csv/density.csv', {
         download: true,
         complete: function(results) {
@@ -133,6 +145,7 @@
       });
 
       $("#calculate").click(function () {
+        var start = new Date().getTime();
         $("#input").hide();
         $("#header").hide();
         totalPile = Number($("#total").val());
@@ -161,15 +174,30 @@
         //console.log(calcQuickRate());
         //console.log(calcSlowRate());
         $("#page").show();
+         var end = new Date().getTime();
+         console.log((end - start)+"ms");
       });
+
+      $("#district").change(function () {
+        var kind = Number($("#district").val());
+        if(kind == 6 || kind == 7 ){
+          $("#disTotal").val((disQuickPile[5]+disQuickPile[6])+" | "+(disSlowPile[5]+disSlowPile[6]));
+        }
+        else{
+          $("#disTotal").val(disQuickPile[kind - 1]+" | "+disSlowPile[kind - 1]);
+        }
+      })
     });
   </script>
 </head>
 <body>
-<div id="page">
+<div id="page" style="z-index: 0;">
+  <div id="flag" hidden="hidden" style="position:absolute;z-index: 5;">
+    <img src="src/flag.png" style="width:30px;height:30px;">
+  </div>
   <div id="pageContent">
     <div id="imgContainer">
-      <img id="imageFullScreen" src="src/map.jpg"/>
+      <img id="imageFullScreen" src="src/map1.jpg"/>
     </div>
     <div id="positionButtonDiv">
       <p>缩放 :
@@ -192,7 +220,7 @@
     </div>
   </div>
   <div style="padding: 570px 100px 10px;">
-    <form>
+    <form hidden="hidden">
       <div class="col-md-6 col-md-offset-1 col-sm-6 col-sm-offset-1 col-xs-6 col-xs-offset-1">
         <div class="input-group input-group-lg">
           <span class="input-group-addon">所选位置</span>
@@ -206,20 +234,44 @@
         </div>
       </div>
     </form>
-    <div style="height:50px;"></div>
     <form>
-      <div class="col-md-6 col-md-offset-1 col-sm-6 col-sm-offset-1 col-xs-6 col-xs-offset-1">
+      <div class="col-md-4 col-md-offset-1 col-sm-4 col-sm-offset-1 col-xs-4 col-xs-offset-1">
         <div class="input-group input-group-lg">
-          <span class="input-group-addon">功效函数<br/>(快充/慢充)</span>
-          <input type="text" class="form-control" style="text-align:center;" disabled="disabled" id="totalRate1" placeholder="">
-          <input type="text" class="form-control" style="text-align:center;" disabled="disabled" id="totalRate2" placeholder="">
+          <span class="input-group-addon">行政区划</span>
+          <select name="useRate" id="district" class="selectpicker show-tick form-control" style="text-align: center;" multiple data-live-search="false">
+            <option value="1">崇明县</option>
+            <option value="2">奉贤区</option>
+            <option value="3">嘉定区</option>
+            <option value="4">金山区</option>
+            <option value="5">闵行区</option>
+            <option value="6">浦东新区</option>
+            <option value="8">青浦区</option>
+            <option value="9">上海中心城区</option>
+            <option value="10">松江区</option>
+          </select>
         </div>
       </div>
-      <div class="col-md-4 col-sm-4 col-xs-4">
+      <div class="col-md-6 col-sm-6 col-xs-6">
+        <div class="input-group input-group-lg">
+          <span class="input-group-addon">总数(快充/慢充)</span>
+          <input type="text" class="form-control" style="text-align:center;" disabled="disabled" id="disTotal" placeholder="|">
+        </div>
+      </div>
+    </form>
+    <div style="height:50px;"></div>
+    <form>
+      <div class="col-md-4 col-md-offset-1 col-sm-4 col-sm-offset-1 col-xs-4 col-xs-offset-1">
         <div class="input-group input-group-lg">
           <span class="input-group-addon">数量<br/>(快充/慢充)</span>
           <input type="text" class="form-control" style="text-align:center;" disabled="disabled" id="number1" placeholder="">
           <input type="text" class="form-control" style="text-align:center;" disabled="disabled" id="number2" placeholder="">
+        </div>
+      </div>
+      <div class="col-md-6 col-sm-6 col-xs-6">
+        <div class="input-group input-group-lg">
+          <span class="input-group-addon">功效函数<br/>(快充/慢充)</span>
+          <input type="text" class="form-control" style="text-align:center;" disabled="disabled" id="totalRate1" placeholder="">
+          <input type="text" class="form-control" style="text-align:center;" disabled="disabled" id="totalRate2" placeholder="">
         </div>
       </div>
     </form>

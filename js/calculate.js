@@ -5,18 +5,27 @@ for(var i=0;i<length;i++){
   square[i] = new Object();
   square[i].prob = new Array();
 }
+
 var grid = new Array();
 for(var i=0;i<19272;i++){
   grid[i] = new Object();
 }
+
 var gridClip = new Array();
 for(var i=0;i<7296;i++){
   gridClip[i] = new Object();
 }
+
+var district = new Array();
+for(var i=0;i<length;i++){
+  district[i] = new Object();
+}
+
 var time = new Array();
 for(var i=0;i<24;i++){
   time[i] = new Array(4);
 }
+
 var totalQuickRate = new Array();
 for(var i=0;i<square.length;i++){
   totalQuickRate[i]=0;
@@ -71,8 +80,17 @@ function calcSlowRate(){
   return result;
 }
 
-var currentQuickRate = 10000;
-var currentSlowRate = 10000;
+var disQuickPile = new Array();
+var disSlowPile = new Array();
+for(var i=0;i<10;i++){
+  disQuickPile[i] = 0;
+  disSlowPile[i] = 0;
+}
+
+var currentQuickRate = 1000000;
+var currentSlowRate = 1000000;
+var totalQuickMissRate = 0,totalQuickFillRate = 0,totalSlowMissRate = 0, totalSlowFillRate = 0;
+var quickCount = 0, slowCount = 0;
 function calcPile() {
   calcEvent();
   while(1){
@@ -96,8 +114,13 @@ function calcPile() {
       break;
     }
   }
-  //console.log(totalQuickRate);
-  //console.log(totalSlowRate);
+  console.log("Quick--MissRate:"+(totalQuickMissRate/quickCount).toFixed(4)+",FillRate:"+(totalQuickFillRate/quickCount).toFixed(4));
+  console.log("Slow--MissRate:"+(totalSlowMissRate/slowCount).toFixed(4)+",FillRate:"+(totalSlowFillRate/slowCount).toFixed(4));
+  for(var i=0;i<square.length;i++){
+    var kind = district[i].kind;
+    disQuickPile[kind] += quickPile[i];
+    disSlowPile[kind] += slowPile[i];
+  }
 }
 
 function swap(a,b){
@@ -224,8 +247,13 @@ function calcEvent() {
     slowMiss[i] = 0;
     quickChargingEvent[i] = 0;
     slowChargingEvent[i] = 0;
-
   }
+  totalQuickMissRate = 0;
+  totalQuickFillRate = 0;
+  totalSlowMissRate = 0;
+  totalSlowFillRate = 0;
+  quickCount = 0;
+  slowCount = 0;
   for(var i=0;i<square.length;i++){
     quickCharge[i] = new Array();
     slowCharge[i] = new Array();
@@ -272,9 +300,12 @@ function calcEvent() {
   }
   for(var i=0;i<square.length;i++) {
     if (quickPile[i] > 0 && quickChargingEvent[i] > 0) {
-      var quickMissRate = quickMiss[i] / quickChargingEvent[i];
-      var quickFillRate = quickChargingTime[i] / quickPile[i] / 24;
-      totalQuickRate[i] = (0.5 * quickFillRate + 0.5 * (1 - quickMissRate)).toFixed(4);
+      var missRate = quickMiss[i] / quickChargingEvent[i];
+      var fillRate = quickChargingTime[i] / quickPile[i] / 24;
+      totalQuickMissRate += missRate;
+      totalQuickFillRate += fillRate;
+      quickCount++;
+      totalQuickRate[i] = (0.5 * fillRate + 0.5 * (1 - missRate)).toFixed(4);
     }
     else {
       totalQuickRate[i] = 0;
@@ -282,6 +313,9 @@ function calcEvent() {
     if (slowPile[i] > 0 && slowChargingEvent[i] > 0) {
       var missRate = slowMiss[i] / slowChargingEvent[i];
       var fillRate = slowChargingTime[i] / slowPile[i] / 24;
+      totalSlowMissRate += missRate;
+      totalSlowFillRate += fillRate;
+      slowCount++;
       totalSlowRate[i] = (0.5 * fillRate + 0.5 * (1 - missRate)).toFixed(4);
     }
     else {
