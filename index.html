@@ -23,6 +23,7 @@
   <script>
     $(document).ready(function() {
 
+      init();
       $('#imageFullScreen').smartZoom({'maxScale' : 8, 'containerClass':'zoomableContainer'});
 
       $('#topPositionMap,#leftPositionMap,#rightPositionMap,#bottomPositionMap').bind("click", moveButtonClickHandler);
@@ -171,8 +172,6 @@
           }
         }
         calcPile();
-        //console.log(calcQuickRate());
-        //console.log(calcSlowRate());
         $("#page").show();
         var end = new Date().getTime();
         console.log((end - start)+"ms");
